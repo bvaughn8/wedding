@@ -15,3 +15,6 @@ next-env.d.ts
 .DS_Store
 .vercel
 npm-debug.log*
+
+# local notes and decisions for Claude (not committed)
+/claude/
