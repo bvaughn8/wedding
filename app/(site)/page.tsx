@@ -1,7 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
 import Link from "next/link";
 import { Bowl, FlightPath, Globe, Heart, Shoe, Yarn, YarnUnderline } from "@/components/doodles";
-import { FavoriteThings } from "@/components/favorite-things";
 import { getCurrentGuest } from "@/lib/guest";
 import { loadHouseholdRsvp, missingAnswers } from "@/lib/rsvp";
 
@@ -63,8 +62,6 @@ export default async function HomePage() {
           </div>
         ) : null}
       </section>
-
-      <FavoriteThings />
     </div>
   );
 }

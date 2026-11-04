@@ -12,7 +12,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
 
   return (
     <div className="min-h-dvh">
-      <header className="border-b border-line print:hidden">
+      <header className="border-b border-line bg-paper/85 backdrop-blur-sm print:hidden">
         <div className="mx-auto flex max-w-4xl items-center justify-between gap-4 px-4 py-4">
           <Link href="/" className="font-serif text-2xl">
             B <span className="text-accent">&amp;</span> S

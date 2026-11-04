@@ -65,11 +65,6 @@ body {
   100% { opacity: 0; transform: translateY(-14px) scaleY(1.1); }
 }
 @keyframes doodle-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
-@keyframes doodle-wiggle {
-  0%, 100% { rotate: 0deg; }
-  25% { rotate: -5deg; }
-  75% { rotate: 5deg; }
-}
 @keyframes doodle-rise {
   from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: none; }
@@ -100,11 +95,57 @@ body {
   animation: doodle-rise 0.7s ease-out var(--delay, 0s) forwards;
 }
 .anim-pulse { animation: doodle-pulse 1.6s ease-in-out infinite; }
-.hover-wiggle:hover .doodle-tile-icon { animation: doodle-wiggle 0.5s ease-in-out 2; }
+
+/* ---------------------------------------------------------------------------
+   Edge runner: laps the viewport edge. Size is 44×54; each side's share of
+   the lap is roughly proportional to a landscape screen's perimeter.
+   --------------------------------------------------------------------------- */
+
+.edge-runner {
+  --w: 44px;
+  --h: 54px;
+  position: absolute;
+  width: var(--w);
+  height: var(--h);
+  animation: edge-lap 40s linear infinite;
+}
+.edge-runner-body { animation: runner-bob 0.36s ease-in-out infinite; }
+/* Phones have a 16px gutter; keep him small so he mostly stays in it. */
+@media (max-width: 639px) {
+  .edge-runner { --w: 30px; --h: 37px; }
+}
+
+@keyframes edge-lap {
+  /* bottom edge, left → right, upright */
+  0%      { left: 0; top: calc(100% - var(--h)); rotate: 0deg; }
+  32%     { left: calc(100% - var(--w)); top: calc(100% - var(--h)); rotate: 0deg; }
+  /* right edge, bottom → top, feet on the wall */
+  32.01%  { left: calc(100% - var(--w)); top: calc(100% - var(--h)); rotate: -90deg; }
+  50%     { left: calc(100% - var(--w)); top: 0; rotate: -90deg; }
+  /* top edge, right → left, upside down */
+  50.01%  { left: calc(100% - var(--w)); top: 0; rotate: -180deg; }
+  82%     { left: 0; top: 0; rotate: -180deg; }
+  /* left edge, top → bottom */
+  82.01%  { left: 0; top: 0; rotate: -270deg; }
+  100%    { left: 0; top: calc(100% - var(--h)); rotate: -270deg; }
+}
+@keyframes runner-bob { 50% { transform: translateY(-2px); } }
+@keyframes runner-swing { from { transform: rotate(38deg); } to { transform: rotate(-38deg); } }
+
+.runner-leg-a, .runner-leg-b, .runner-arm-a, .runner-arm-b {
+  transform-box: view-box;
+  animation: runner-swing 0.36s ease-in-out infinite alternate;
+}
+.runner-leg-a, .runner-leg-b { transform-origin: 18px 30px; }
+.runner-arm-a, .runner-arm-b { transform-origin: 20px 19px; }
+/* Legs and arms move in opposite phase, like a real stride. */
+.runner-leg-b, .runner-arm-a { animation-direction: alternate-reverse; }
 
 @media (prefers-reduced-motion: reduce) {
+  .edge-runner-track { display: none; }
+
   .anim-float, .anim-spin, .anim-sway, .anim-run, .anim-speed, .anim-steam,
-  .anim-orbit, .anim-pulse, .hover-wiggle:hover .doodle-tile-icon {
+  .anim-orbit, .anim-pulse {
     animation: none;
   }
   .anim-draw { animation: none; stroke-dashoffset: 0; }
