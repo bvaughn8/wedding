@@ -2,6 +2,7 @@
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { sendEmailCode } from "@/lib/auth-code";
 import {
   isValidCode,
   isValidEmail,
@@ -80,11 +81,7 @@ export async function startClaim(
     };
   }
 
-  const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithOtp({
-    email,
-    options: { shouldCreateUser: true },
-  });
+  const { error } = await sendEmailCode(email, { shouldCreateUser: true });
   if (error) {
     return { ok: false, error: `We couldn't send your code: ${error.message}` };
   }
@@ -154,11 +151,7 @@ export async function sendCodeToSavedEmail(
     return { ok: false, error: "You haven't set up an email yet." };
   }
 
-  const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithOtp({
-    email: guest.email,
-    options: { shouldCreateUser: false },
-  });
+  const { error } = await sendEmailCode(guest.email, { shouldCreateUser: false });
   if (error) {
     return { ok: false, error: `We couldn't send your code: ${error.message}` };
   }

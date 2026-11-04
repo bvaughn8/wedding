@@ -9,11 +9,22 @@ Decisions and their reasoning: `claude/tech-stack-and-auth-decisions.md` (local,
 ## Commands
 
 ```bash
-npm install          # Node >= 20.9
+npm install          # Node >= 22.12 (Tailwind v4 + supabase-js need it; 20.x fails the build)
 npm run dev          # http://localhost:3000 — restart after editing .env.local
 npm run build        # production build; run before calling work done
 npm run typecheck    # tsc --noEmit
 ```
+
+### Database migrations (Supabase CLI)
+
+The repo is linked to the remote project (`ajebevwzlxlvjzzkjqbg`; link state in `supabase/.temp/`). Apply new files in `supabase/migrations/` with:
+
+```bash
+npx supabase db push --remote --dry-run   # preview which migrations will run
+npx supabase db push --remote             # apply; prompts for the database password
+```
+
+`--remote` is required here (there's no local Supabase stack). The CLI records applied migrations, so each push only runs new files. To add a migration, create `supabase/migrations/<YYYYMMDDHHMMSS>_<name>.sql`; never edit one that's already been pushed. Seeds aren't applied by `db push`.
 
 No linter is configured yet (`next lint` was removed in Next 16; add ESLint or Biome directly if needed). No test suite yet.
 
@@ -24,10 +35,12 @@ No linter is configured yet (`next lint` was removed in Next 16; add ESLint or B
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` — `sb_publishable_…`, safe in the browser
 - `SUPABASE_SECRET_KEY` — `sb_secret_…`, **server only**. Bypasses RLS. Never prefix with `NEXT_PUBLIC_`, never import `lib/supabase/admin.ts` from client code.
+- `SITE_URL` — e.g. `https://billyandsimmi.com`; base for invite links and QR codes. Falls back to the request host (fine locally, wrong for printing).
+- `DEV_LOG_AUTH_CODES=true` — dev only: sign-in codes are printed to the `npm run dev` log (`[DEV_LOG_AUTH_CODES] …`) instead of emailed (`lib/auth-code.ts`). Ignored when `NODE_ENV` is production. `/login` still only issues codes for emails already linked to a guest.
 
 ## Testing the app locally
 
-1. Supabase SQL Editor: run `supabase/migrations/*.sql` in order, then a copy of `supabase/seed.example.sql` with real names. Its last query prints invite links.
+1. Apply migrations with `npx supabase db push --remote` (see above), then in the Supabase SQL Editor run a copy of `supabase/seed.example.sql` with real names. Its last query prints invite links.
 2. `npm run dev`, open `http://localhost:3000/i/<invite_token>`.
    - Household name + guest names shown → DB + secret key work.
    - "We couldn't find that invitation" → connected, but token not in `households`.
@@ -57,6 +70,8 @@ lib/email.ts              email/code normalisation + masking
 app/i/[token]/            QR invite flow (page, client flow, server actions)
 app/login/                returning-guest sign-in
 app/(site)/               everything behind the gate
+app/(site)/admin/         admin only (requireAdmin in lib/admin.ts): households, guests, invite links, QR print page, CSV export
+app/(site)/rsvp/          household RSVP form + saveRsvp action
 app/not-invited/          signed in but not linked to a guest
 app/auth/signout/         POST sign-out
 components/ui.tsx         shared UI primitives
@@ -78,17 +93,19 @@ supabase/migrations/      schema, grants, RLS
 - Next 16: `params`, `searchParams`, `cookies()`, `headers()` are async — `await` them.
 - No generated DB types yet; consider `supabase gen types typescript` once the schema settles.
 - Commit `package-lock.json`.
+- **Storage buckets are separate by purpose.** `site-photos` (private) holds the couple's photos for site content (Our story, etc.): uploaded in the dashboard, referenced by path in `content/*.ts`, served via signed URLs from `lib/photos.ts` (`signedPhotoUrls`). It must **never** be listed or shown in the guest photo gallery. The gallery gets its own bucket.
 
 ## Status
 
-**Done:** project scaffold, households/guests schema + RLS, QR-invite + email-OTP sign-in, guest-list gate, placeholder home page.
+**Done:** project scaffold, households/guests schema + RLS, QR-invite + email-OTP sign-in, guest-list gate, animated home page (`components/doodles.tsx`), admin households/invites/QR/CSV, events + per-guest RSVPs with per-event meal options (`/rsvp`, `/admin/events`). Build passes on Node 22; invite flow + admin households tested by hand.
 
-**Not yet verified end-to-end:** files were written without being able to run `npm install`/`build` in the original environment. First step in a new session: `npm run build` and fix anything that fails, then test the invite flow.
+**Not yet tested in a browser:** RSVP form and `/admin/events` (migration is applied).
+
+**RSVP model:** `events` (with `meal_options text[]`, `all_households`, `rsvp_deadline`), `event_invites` (when not all households), `rsvps` (guest × event), `guests.dietary_notes`. Anyone in a household answers for all of it; writes go through `app/(site)/rsvp/actions.ts` with the admin client after checking household/invite/meal/deadline. New guests land on `/rsvp` right after first sign-up.
 
 **Next up**
-1. Admin page: list households, invite links, printable QR codes / CSV export for the invitation designer.
-2. Wedding info pages (schedule, venue, travel, FAQ).
-3. RSVP per household — per-person attending + meal choice; plus-ones are a flag on `guests`.
-4. Photos: private Supabase Storage bucket, direct browser uploads via signed upload URLs, browser-side thumbnail generation (also converts iPhone HEIC), originals kept, admin approve/hide before photos show in the gallery. Open question: photos only, or videos too?
-5. Admin: RSVP overview, photo moderation, events & supplier tracking.
-6. Deploy to Vercel + custom domain; upgrade Supabase to Pro ($25/mo) shortly before RSVPs open (Free pauses after 1 week idle, 1 GB storage, 50 MB uploads).
+1. Wedding info pages (schedule, venue, travel, FAQ).
+2. Email (Resend SMTP) so real guests get codes.
+3. Guest photo gallery: its **own** private Supabase Storage bucket (not `site-photos`), direct browser uploads via signed upload URLs, browser-side thumbnail generation (also converts iPhone HEIC), originals kept, admin approve/hide before photos show in the gallery. Open question: photos only, or videos too?
+4. Admin: photo moderation, supplier tracking.
+5. Deploy to Vercel + custom domain; upgrade Supabase to Pro ($25/mo) shortly before RSVPs open (Free pauses after 1 week idle, 1 GB storage, 50 MB uploads).

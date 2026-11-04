@@ -2,6 +2,7 @@
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { sendEmailCode } from "@/lib/auth-code";
 import {
   isValidCode,
   isValidEmail,
@@ -30,11 +31,7 @@ export async function sendLoginCode(rawEmail: string): Promise<LoginResult> {
     .maybeSingle();
 
   if (guest) {
-    const supabase = await createClient();
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { shouldCreateUser: false },
-    });
+    const { error } = await sendEmailCode(email, { shouldCreateUser: false });
     if (error) {
       return { ok: false, error: `We couldn't send your code: ${error.message}` };
     }
