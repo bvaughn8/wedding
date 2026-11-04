@@ -32,7 +32,8 @@ export function LoginForm() {
     startTransition(async () => {
       const result = await verifyLoginCode(email, code);
       if (!result.ok) return setError(result.error);
-      router.replace("/");
+      // New guests go straight to the RSVP, as after a QR sign-up.
+      router.replace(result.firstTime ? "/rsvp" : "/");
       router.refresh();
     });
   }
@@ -41,7 +42,7 @@ export function LoginForm() {
     return (
       <form onSubmit={sendCode} className="space-y-4">
         <h1 className="font-serif text-3xl">Sign in</h1>
-        <p className="text-muted">Enter the email you used when you set up your invitation.</p>
+        <p className="text-muted">Enter the email you set up your invitation with, or the one Billy &amp; Simmi have for you.</p>
         <label className="block">
           <span className="mb-1 block text-sm font-medium">Email</span>
           <Input

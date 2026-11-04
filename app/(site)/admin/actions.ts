@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { getAdmin, newInviteToken } from "@/lib/admin";
 import { createClient } from "@/lib/supabase/server";
+import { isValidEmail, normalizeEmail } from "@/lib/email";
 import type { FormState } from "./forms";
 
 // Every action re-checks admin status itself, and runs as the signed-in user,
@@ -94,6 +95,31 @@ export async function removeGuest(_: FormState, fd: FormData): Promise<FormState
   const supabase = await createClient();
   const { error } = await supabase.from("guests").delete().eq("id", id);
   return error ? { error: error.message } : done();
+}
+
+/**
+ * Pre-fills (or clears) the email of a guest who hasn't signed up yet, so they
+ * can sign in at /login without the QR code. Once a guest has signed up their
+ * email is tied to their login; use "Reset sign-in" to change it.
+ */
+export async function setGuestEmail(_: FormState, fd: FormData): Promise<FormState> {
+  if (!(await getAdmin())) return NOT_ADMIN;
+  const id = text(fd, "guest_id");
+  const raw = text(fd, "email");
+  const email = raw ? normalizeEmail(raw) : null;
+  if (email && !isValidEmail(email)) return { error: "That doesn't look like an email address." };
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("guests")
+    .update({ email })
+    .eq("id", id)
+    .is("user_id", null)
+    .select("id");
+  if (error?.code === "23505") return { error: "Another guest already has that email." };
+  if (error) return { error: error.message };
+  if (!data?.length) return { error: "This guest has already signed up; use Reset sign-in to change their email." };
+  return done();
 }
 
 /** Unlinks a guest's login (e.g. they used the wrong email) so they can set up again. */
