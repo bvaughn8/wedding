@@ -18,3 +18,9 @@ npm-debug.log*
 
 # local notes and decisions for Claude (not committed)
 /claude/
+
+# Supabase CLI local state (linked project, cached versions)
+/supabase/.temp/
+
+# Editor settings (SQLTools stores DB connection strings here)
+/.vscode/

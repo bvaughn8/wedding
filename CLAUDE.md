@@ -15,6 +15,17 @@ npm run build        # production build; run before calling work done
 npm run typecheck    # tsc --noEmit
 ```
 
+### Database migrations (Supabase CLI)
+
+The repo is linked to the remote project (`ajebevwzlxlvjzzkjqbg`; link state in `supabase/.temp/`). Apply new files in `supabase/migrations/` with:
+
+```bash
+npx supabase db push --remote --dry-run   # preview which migrations will run
+npx supabase db push --remote             # apply; prompts for the database password
+```
+
+`--remote` is required here (there's no local Supabase stack). The CLI records applied migrations, so each push only runs new files. To add a migration, create `supabase/migrations/<YYYYMMDDHHMMSS>_<name>.sql`; never edit one that's already been pushed. Seeds aren't applied by `db push`.
+
 No linter is configured yet (`next lint` was removed in Next 16; add ESLint or Biome directly if needed). No test suite yet.
 
 ## Environment
@@ -27,7 +38,7 @@ No linter is configured yet (`next lint` was removed in Next 16; add ESLint or B
 
 ## Testing the app locally
 
-1. Supabase SQL Editor: run `supabase/migrations/*.sql` in order, then a copy of `supabase/seed.example.sql` with real names. Its last query prints invite links.
+1. Apply migrations with `npx supabase db push --remote` (see above), then in the Supabase SQL Editor run a copy of `supabase/seed.example.sql` with real names. Its last query prints invite links.
 2. `npm run dev`, open `http://localhost:3000/i/<invite_token>`.
    - Household name + guest names shown → DB + secret key work.
    - "We couldn't find that invitation" → connected, but token not in `households`.
