@@ -39,14 +39,14 @@ export type Person = {
 export const intro = {
   kicker: "Our story",
   title: "Billy & Simmi",
-  caption: "Two people, a lot of yarn, too many airport snacks.",
+  caption: "Two people, a big world, too many airport lounge snacks.",
   photo: { alt: "Billy and Simmi together", tone: "sage", image: "couch.jpg", focus: "50% 28%" } as Photo,
 };
 
 export const simmi: Person = {
   name: "Simmi",
-  tagline: "Maker of blankets, planner of trips.",
-  bio: "Simmi can turn a single ball of yarn into a blanket, a hat and three gifts before most people finish their coffee. She plans every holiday down to the snack stops, collects recipes from everywhere we go, and is the reason we always arrive somewhere with a list of places to eat.",
+  tagline: "The artsy one.",
+  bio: "Simmi can turn a single ball of yarn into a blanket, a hat and three gifts before most people finish their coffee. She's always down to throw clay, go on an adventure, or try out whatever Billy has cooking.",
   facts: [
     { label: "Hometown", value: "Hong Kong" },
     { label: "Always has", value: "A crochet hook" },
@@ -76,7 +76,7 @@ export const timeline: {
   {
     when: "2023",
     title: "We met",
-    text: "A friend's birthday, a crowded kitchen, and a long argument about the best dumplings in town.",
+    text: "Another dating app success story, joined together over Canto cocktails, a bowl of ramen, and a riverside chat.",
     photo: { alt: "Where we met", tone: "mustard", image: "us-first.jpg", focus: "45% 36%" },
   },
   {
@@ -88,19 +88,19 @@ export const timeline: {
   {
     when: "2021",
     title: "First international trip",
-    text: "Simmi's first granny-square blanket. Billy still claims he chose the colours.",
+    text: "An adventure to Belize and Guatemala to explore Mayan ruins, fry jacks, and beachside relaxation.",
     photo: { alt: "The first blanket", tone: "blush", image: "gua-pyramid.jpg", focus: "50% 24%" },
   },
   {
     when: "2023",
     title: "Race day",
-    text: "Billy's first half marathon, Simmi at mile 10 with a sign and a shirt with too many Billys on it.",
+    text: "One of Billy's many marathons. Simmi always on the side with a sign ready to cheer.",
     photo: { alt: "Race day", tone: "sage", image: "marathon.jpg", focus: "50% 14%" },
   },
   {
     when: "2026",
     title: "The question",
-    text: "A detour from a tiramisu escapade.",
+    text: "A quick detour from a tiramisu escapade. Back to the original riverside chat spot.",
     photo: { alt: "The proposal", tone: "mustard", image: "engagement.JPG", focus: "35% 65%" },
   },
 ];
@@ -108,7 +108,7 @@ export const timeline: {
 export const stats: { value: number; suffix?: string; label: string }[] = [
   { value: 14, label: "countries together" },
   { value: 7, label: "Marathons" },
-  { value: 19, label: "Chrocheted hats (and counting)" },
+  { value: 19, label: "Crocheted hats (and counting)" },
   { value: 1000, suffix: "+", label: "dumplings shared" },
 ];
 

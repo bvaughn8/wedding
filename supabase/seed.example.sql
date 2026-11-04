@@ -6,7 +6,7 @@ with h as (
 )
 insert into public.guests (household_id, first_name, last_name, is_admin)
 select id, g.first_name, g.last_name, true
-from h, (values ('Billy', null), ('Simmi', null)) as g(first_name, last_name);
+from h, (values ('Billy', 'Vaughn'), ('Simmi', 'So')) as g(first_name, last_name);
 
 with h as (
   insert into public.households (name) values ('The Example Family') returning id
@@ -16,7 +16,7 @@ select id, g.first_name, g.last_name
 from h, (values ('Alex', 'Example'), ('Sam', 'Example')) as g(first_name, last_name);
 
 -- Invite links to turn into QR codes (swap in your real domain):
-select name, 'https://your-domain.com/i/' || invite_token as invite_link
+select name, 'http://localhost:3000/i/' || invite_token as invite_link
 from public.households
 order by name;
 
