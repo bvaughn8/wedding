@@ -141,6 +141,62 @@ body {
 /* Legs and arms move in opposite phase, like a real stride. */
 .runner-leg-b, .runner-arm-a { animation-direction: alternate-reverse; }
 
+/* Simmi, sitting on the bottom edge crocheting. */
+.edge-simmi {
+  --sw: 46px;
+  --sh: 50px;
+  position: absolute;
+  bottom: 0;
+  left: 72%;
+  width: var(--sw);
+  height: var(--sh);
+  translate: -50% 0;
+}
+@media (max-width: 639px) {
+  .edge-simmi { --sw: 32px; --sh: 35px; }
+}
+.edge-simmi-body,
+.edge-runner-body {
+  transform-origin: 50% 100%; /* lean from the feet / seat */
+  transition: rotate 0.3s ease-out;
+}
+.simmi-hook {
+  transform-box: view-box;
+  transform-origin: 27.6px 31.4px;
+  animation: simmi-crochet 0.45s ease-in-out infinite alternate;
+}
+@keyframes simmi-crochet { from { transform: rotate(-14deg); } to { transform: rotate(16deg); } }
+.simmi-ball {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: simmi-ball 1.8s ease-in-out infinite;
+}
+@keyframes simmi-ball { 50% { transform: rotate(24deg); } }
+
+/* The kiss: everyone holds still while they lean in. */
+[data-kissing] .simmi-hook,
+[data-kissing] .simmi-ball,
+[data-kissing] .edge-runner-body,
+[data-kissing] .runner-leg-a,
+[data-kissing] .runner-leg-b,
+[data-kissing] .runner-arm-a,
+[data-kissing] .runner-arm-b {
+  animation-play-state: paused;
+}
+
+/* Position and size are set inline from where their heads meet. */
+.kiss-heart {
+  position: absolute;
+  animation: kiss-heart 2.6s ease-out forwards;
+}
+@keyframes kiss-heart {
+  0%   { opacity: 0; translate: -50% 0; scale: 0.3; rotate: 0deg; }
+  15%  { opacity: 1; translate: -50% -8px; scale: 1.15; }
+  40%  { rotate: -12deg; }
+  70%  { rotate: 10deg; opacity: 0.9; }
+  100% { opacity: 0; translate: calc(-50% + 16px) -110px; scale: 1.4; rotate: 0deg; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .edge-runner-track { display: none; }
 

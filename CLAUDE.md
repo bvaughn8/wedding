@@ -93,6 +93,7 @@ supabase/migrations/      schema, grants, RLS
 - Next 16: `params`, `searchParams`, `cookies()`, `headers()` are async — `await` them.
 - No generated DB types yet; consider `supabase gen types typescript` once the schema settles.
 - Commit `package-lock.json`.
+- **Storage buckets are separate by purpose.** `site-photos` (private) holds the couple's photos for site content (Our story, etc.): uploaded in the dashboard, referenced by path in `content/*.ts`, served via signed URLs from `lib/photos.ts` (`signedPhotoUrls`). It must **never** be listed or shown in the guest photo gallery. The gallery gets its own bucket.
 
 ## Status
 
@@ -105,6 +106,6 @@ supabase/migrations/      schema, grants, RLS
 **Next up**
 1. Wedding info pages (schedule, venue, travel, FAQ).
 2. Email (Resend SMTP) so real guests get codes.
-3. Photos: private Supabase Storage bucket, direct browser uploads via signed upload URLs, browser-side thumbnail generation (also converts iPhone HEIC), originals kept, admin approve/hide before photos show in the gallery. Open question: photos only, or videos too?
+3. Guest photo gallery: its **own** private Supabase Storage bucket (not `site-photos`), direct browser uploads via signed upload URLs, browser-side thumbnail generation (also converts iPhone HEIC), originals kept, admin approve/hide before photos show in the gallery. Open question: photos only, or videos too?
 4. Admin: photo moderation, supplier tracking.
 5. Deploy to Vercel + custom domain; upgrade Supabase to Pro ($25/mo) shortly before RSVPs open (Free pauses after 1 week idle, 1 GB storage, 50 MB uploads).

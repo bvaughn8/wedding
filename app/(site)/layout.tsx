@@ -17,9 +17,12 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
           <Link href="/" className="font-serif text-2xl">
             B <span className="text-accent">&amp;</span> S
           </Link>
-          <nav className="flex items-center gap-5 text-sm">
+          <nav className="flex flex-wrap items-center justify-end gap-x-4 gap-y-1 text-sm sm:gap-x-5">
             <Link href="/" className="hover:text-accent">
               Home
+            </Link>
+            <Link href="/about" className="hover:text-accent">
+              Our story
             </Link>
             <Link href="/rsvp" className="hover:text-accent">
               RSVP
@@ -37,7 +40,10 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
           </nav>
         </div>
       </header>
-      <main className="mx-auto max-w-4xl px-4 py-10 print:max-w-none print:p-0">{children}</main>
+      {/* Pages that wrap themselves in .full-bleed (e.g. Our story) get the whole width. */}
+      <main className="mx-auto max-w-4xl px-4 py-10 has-[>.full-bleed]:max-w-none has-[>.full-bleed]:p-0 print:max-w-none print:p-0">
+        {children}
+      </main>
     </div>
   );
 }

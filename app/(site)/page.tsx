@@ -34,6 +34,13 @@ export default async function HomePage() {
           You&apos;re signed in as part of {guest.household.name}. We can&apos;t wait to
           celebrate with you. Wedding details and photos are coming soon.
         </p>
+        <Link
+          href="/about"
+          className="anim-rise mt-3 inline-block text-sm text-accent-dark underline underline-offset-4 hover:text-ink"
+          style={{ "--delay": "0.6s" } as CSSProperties}
+        >
+          Read our story →
+        </Link>
 
         {rsvp.events.length ? (
           <div
