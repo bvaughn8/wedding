@@ -9,6 +9,14 @@
   --color-accent-dark: #55664a;
   --color-danger: #a4473b;
 
+  /* Doodle palette (home page illustrations) */
+  --color-blush: #e2b4ad;
+  --color-blush-dark: #b77d74;
+  --color-mustard: #d8b25a;
+  --color-sky: #9fb8c8;
+  --color-sky-dark: #6f8796;
+  --color-sage-light: #b7c9aa;
+
   --font-serif: var(--font-cormorant), ui-serif, Georgia, serif;
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
@@ -21,4 +29,85 @@ body {
   background: var(--color-paper);
   color: var(--color-ink);
   font-family: var(--font-sans);
+}
+
+/* ---------------------------------------------------------------------------
+   Home page doodle animations
+   SVG parts animate around their own centre unless told otherwise.
+   --------------------------------------------------------------------------- */
+
+.doodle * {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes doodle-float {
+  0%, 100% { transform: translateY(0) rotate(var(--tilt, 0deg)); }
+  50% { transform: translateY(-14px) rotate(calc(var(--tilt, 0deg) + 8deg)); }
+}
+@keyframes doodle-spin { to { transform: rotate(360deg); } }
+@keyframes doodle-sway {
+  0%, 100% { transform: rotate(-8deg); }
+  50% { transform: rotate(10deg); }
+}
+@keyframes doodle-run {
+  0%, 100% { transform: translateY(0) rotate(-5deg); }
+  50% { transform: translateY(-7px) rotate(4deg); }
+}
+@keyframes doodle-speed {
+  0% { opacity: 0; transform: translateX(8px); }
+  40% { opacity: 1; }
+  100% { opacity: 0; transform: translateX(-10px); }
+}
+@keyframes doodle-steam {
+  0% { opacity: 0; transform: translateY(6px) scaleY(0.8); }
+  40% { opacity: 0.9; }
+  100% { opacity: 0; transform: translateY(-14px) scaleY(1.1); }
+}
+@keyframes doodle-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes doodle-wiggle {
+  0%, 100% { rotate: 0deg; }
+  25% { rotate: -5deg; }
+  75% { rotate: 5deg; }
+}
+@keyframes doodle-rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes doodle-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+
+.anim-float { animation: doodle-float var(--dur, 7s) ease-in-out var(--delay, 0s) infinite; }
+.anim-spin { animation: doodle-spin 14s linear infinite; }
+.anim-sway { animation: doodle-sway 2.4s ease-in-out infinite; }
+.anim-run { animation: doodle-run 0.7s ease-in-out infinite; }
+.anim-speed { animation: doodle-speed 0.7s linear infinite; }
+.anim-steam { animation: doodle-steam 2.6s ease-out var(--delay, 0s) infinite; }
+.anim-orbit {
+  animation: doodle-spin 9s linear infinite;
+  transform-box: view-box;
+  transform-origin: 32px 32px;
+}
+.anim-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: doodle-draw 2.6s ease-out 0.4s forwards;
+}
+.anim-rise {
+  opacity: 0;
+  animation: doodle-rise 0.7s ease-out var(--delay, 0s) forwards;
+}
+.anim-pulse { animation: doodle-pulse 1.6s ease-in-out infinite; }
+.hover-wiggle:hover .doodle-tile-icon { animation: doodle-wiggle 0.5s ease-in-out 2; }
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-float, .anim-spin, .anim-sway, .anim-run, .anim-speed, .anim-steam,
+  .anim-orbit, .anim-pulse, .hover-wiggle:hover .doodle-tile-icon {
+    animation: none;
+  }
+  .anim-draw { animation: none; stroke-dashoffset: 0; }
+  .anim-rise { animation: none; opacity: 1; }
+  .motion-only { display: none; }
 }

@@ -83,7 +83,8 @@ export function InviteFlow({
           ? confirmClaim(token, guest.id, claimEmail, code)
           : verifySavedEmailCode(token, guest.id, code),
       () => {
-        router.replace("/");
+        // First-time set-up goes straight on to the RSVP; returning guests go home.
+        router.replace(claimEmail ? "/rsvp" : "/");
         router.refresh();
       },
     );
