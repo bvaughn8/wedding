@@ -37,17 +37,26 @@ create index guests_household_id_idx on public.guests (household_id);
 -- Helpers used by row-level security
 -- ---------------------------------------------------------------------------
 
-create or replace function public.current_household_id()
+-- Kept in a private schema (not exposed through the Data API), so they can't
+-- be called as public endpoints. SECURITY DEFINER lets them read guests
+-- without recursing into the guests RLS policies; both only ever look up the
+-- caller's own row via auth.uid().
+
+create schema if not exists private;
+revoke all on schema private from public, anon;
+grant usage on schema private to authenticated;
+
+create or replace function private.current_household_id()
 returns uuid
 language sql
 stable
 security definer
 set search_path = ''
 as $$
-  select household_id from public.guests where user_id = auth.uid()
+  select household_id from public.guests where user_id = (select auth.uid())
 $$;
 
-create or replace function public.is_admin()
+create or replace function private.is_admin()
 returns boolean
 language sql
 stable
@@ -55,15 +64,26 @@ security definer
 set search_path = ''
 as $$
   select coalesce(
-    (select is_admin from public.guests where user_id = auth.uid()),
+    (select is_admin from public.guests where user_id = (select auth.uid())),
     false
   )
 $$;
 
-revoke execute on function public.current_household_id() from public, anon;
-revoke execute on function public.is_admin() from public, anon;
-grant execute on function public.current_household_id() to authenticated;
-grant execute on function public.is_admin() to authenticated;
+revoke execute on function private.current_household_id() from public, anon;
+revoke execute on function private.is_admin() from public, anon;
+grant execute on function private.current_household_id() to authenticated;
+grant execute on function private.is_admin() to authenticated;
+
+-- ---------------------------------------------------------------------------
+-- Data API access
+--   Since Oct 2026 Supabase no longer exposes new tables automatically, so
+--   grant explicitly. Signed-out visitors (anon) get nothing; signed-in users
+--   get table access that RLS below narrows to their own household.
+-- ---------------------------------------------------------------------------
+
+revoke all on public.households, public.guests from anon;
+grant select, insert, update, delete on public.households, public.guests to authenticated;
+grant select, insert, update, delete on public.households, public.guests to service_role;
 
 -- ---------------------------------------------------------------------------
 -- Row-level security
@@ -78,18 +98,18 @@ alter table public.guests     enable row level security;
 
 create policy "Guests read own household"
   on public.households for select to authenticated
-  using (id = (select public.current_household_id()) or (select public.is_admin()));
+  using (id = (select private.current_household_id()) or (select private.is_admin()));
 
 create policy "Admins manage households"
   on public.households for all to authenticated
-  using ((select public.is_admin()))
-  with check ((select public.is_admin()));
+  using ((select private.is_admin()))
+  with check ((select private.is_admin()));
 
 create policy "Guests read own household members"
   on public.guests for select to authenticated
-  using (household_id = (select public.current_household_id()) or (select public.is_admin()));
+  using (household_id = (select private.current_household_id()) or (select private.is_admin()));
 
 create policy "Admins manage guests"
   on public.guests for all to authenticated
-  using ((select public.is_admin()))
-  with check ((select public.is_admin()));
+  using ((select private.is_admin()))
+  with check ((select private.is_admin()));
