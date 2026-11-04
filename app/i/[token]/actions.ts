@@ -81,7 +81,7 @@ export async function startClaim(
     };
   }
 
-  const { error } = await sendEmailCode(email, { shouldCreateUser: true });
+  const { error } = await sendEmailCode(email, { shouldCreateUser: true, guestId: guest.id });
   if (error) {
     return { ok: false, error: `We couldn't send your code: ${error.message}` };
   }
@@ -151,7 +151,7 @@ export async function sendCodeToSavedEmail(
     return { ok: false, error: "You haven't set up an email yet." };
   }
 
-  const { error } = await sendEmailCode(guest.email, { shouldCreateUser: false });
+  const { error } = await sendEmailCode(guest.email, { shouldCreateUser: false, guestId: guest.id });
   if (error) {
     return { ok: false, error: `We couldn't send your code: ${error.message}` };
   }

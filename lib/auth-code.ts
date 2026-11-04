@@ -3,27 +3,53 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
 /**
- * Dev-only escape hatch: with DEV_LOG_AUTH_CODES=true in .env.local, sign-in
- * codes are generated with the admin API and printed to the dev-server log
- * instead of being emailed. Never active in production builds (NODE_ENV is
- * "production" there), whatever the env var says.
+ * Escape hatches for signing in before email (SMTP) is set up. Instead of
+ * being emailed, the code is generated with the admin API and printed to the
+ * server log:
+ *
+ * - DEV_LOG_AUTH_CODES=true  — dev server only, every email. Ignored when
+ *   NODE_ENV is "production".
+ * - LOG_ADMIN_AUTH_CODES=true — any environment (incl. Vercel), but only for
+ *   admin guests (Billy & Simmi). Guests' codes are always emailed, so a
+ *   guest's code never ends up in a log. For a soft launch; remove once
+ *   email works.
  */
-export function devLogAuthCodes() {
+function devLogAuthCodes() {
   return (
     process.env.NODE_ENV === "development" &&
     process.env.DEV_LOG_AUTH_CODES === "true"
   );
 }
 
+async function isAdminGuest(email: string, guestId?: string) {
+  const admin = createAdminClient();
+  // On first claim the email isn't linked yet, so the caller passes the
+  // (server-validated) guest ID instead.
+  const query = admin.from("guests").select("is_admin");
+  const { data } = guestId
+    ? await query.eq("id", guestId).maybeSingle()
+    : await query.eq("email", email).maybeSingle();
+  return data?.is_admin === true;
+}
+
+async function shouldLogCode(email: string, guestId?: string) {
+  if (devLogAuthCodes()) return true;
+  if (process.env.LOG_ADMIN_AUTH_CODES !== "true") return false;
+  return isAdminGuest(email, guestId);
+}
+
 /**
- * Sends a 6-digit email sign-in code (or, in dev with DEV_LOG_AUTH_CODES,
- * logs it). Verify it as usual with supabase.auth.verifyOtp({ type: "email" }).
+ * Sends a 6-digit email sign-in code (or logs it, see above). Verify it as
+ * usual with supabase.auth.verifyOtp({ type: "email" }).
+ *
+ * `guestId` must come from a server-side lookup (e.g. guestForInvite), never
+ * straight from the browser.
  */
 export async function sendEmailCode(
   email: string,
-  { shouldCreateUser }: { shouldCreateUser: boolean },
+  { shouldCreateUser, guestId }: { shouldCreateUser: boolean; guestId?: string },
 ): Promise<{ error: { message: string } | null }> {
-  if (devLogAuthCodes()) {
+  if (await shouldLogCode(email, guestId)) {
     const admin = createAdminClient();
     if (!shouldCreateUser) {
       // Match signInWithOtp: don't create a user on paths that expect one.
@@ -38,7 +64,7 @@ export async function sendEmailCode(
     });
     if (error) return { error };
     console.log(
-      `\n[DEV_LOG_AUTH_CODES] sign-in code for ${email}: ${data.properties.email_otp}\n`,
+      `\n[LOG_AUTH_CODES] sign-in code for ${email}: ${data.properties.email_otp}\n`,
     );
     return { error: null };
   }

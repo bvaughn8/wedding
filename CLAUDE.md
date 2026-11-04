@@ -36,7 +36,8 @@ No linter is configured yet (`next lint` was removed in Next 16; add ESLint or B
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` — `sb_publishable_…`, safe in the browser
 - `SUPABASE_SECRET_KEY` — `sb_secret_…`, **server only**. Bypasses RLS. Never prefix with `NEXT_PUBLIC_`, never import `lib/supabase/admin.ts` from client code.
 - `SITE_URL` — e.g. `https://billyandsimmi.com`; base for invite links and QR codes. Falls back to the request host (fine locally, wrong for printing).
-- `DEV_LOG_AUTH_CODES=true` — dev only: sign-in codes are printed to the `npm run dev` log (`[DEV_LOG_AUTH_CODES] …`) instead of emailed (`lib/auth-code.ts`). Ignored when `NODE_ENV` is production. `/login` still only issues codes for emails already linked to a guest.
+- `DEV_LOG_AUTH_CODES=true` — dev only: sign-in codes are printed to the `npm run dev` log (`[LOG_AUTH_CODES] …`) instead of emailed (`lib/auth-code.ts`). Ignored when `NODE_ENV` is production. `/login` still only issues codes for emails already linked to a guest.
+- `LOG_ADMIN_AUTH_CODES=true` — soft launch, any environment (Vercel logs included): codes are logged instead of emailed **only for admin guests**; other guests always get an email. Turn off once Resend SMTP works.
 
 ## Testing the app locally
 
@@ -94,6 +95,12 @@ supabase/migrations/      schema, grants, RLS
 - No generated DB types yet; consider `supabase gen types typescript` once the schema settles.
 - Commit `package-lock.json`.
 - **Storage buckets are separate by purpose.** `site-photos` (private) holds the couple's photos for site content (Our story, etc.): uploaded in the dashboard, referenced by path in `content/*.ts`, served via signed URLs from `lib/photos.ts` (`signedPhotoUrls`). It must **never** be listed or shown in the guest photo gallery. The gallery gets its own bucket.
+
+## Git workflow
+
+- Work on a feature branch, push it, and merge into `main` through a PR (`gh` is installed: `C:\Program Files\GitHub CLI\gh.exe`).
+- **Once a branch is merged, delete it** locally and on GitHub without asking (`git branch -d <branch>` and `git push origin --delete <branch>`), then switch to an up-to-date `main`.
+- `supabase/seed.example.sql` stays a generic template; don't commit real names into it.
 
 ## Status
 
