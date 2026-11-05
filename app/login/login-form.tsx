@@ -5,7 +5,7 @@ import { useState, useTransition, type FormEvent } from "react";
 import { Button, CodeInput, ErrorText, Input } from "@/components/ui";
 import { sendLoginCode, verifyLoginCode } from "./actions";
 
-export function LoginForm() {
+export function LoginForm({ next }: { next: string | null }) {
   const router = useRouter();
   const [step, setStep] = useState<"email" | "code">("email");
   const [email, setEmail] = useState("");
@@ -33,7 +33,7 @@ export function LoginForm() {
       const result = await verifyLoginCode(email, code);
       if (!result.ok) return setError(result.error);
       // New guests go straight to the RSVP, as after a QR sign-up.
-      router.replace(result.firstTime ? "/rsvp" : "/");
+      router.replace(result.firstTime ? "/rsvp" : (next ?? "/"));
       router.refresh();
     });
   }
@@ -41,7 +41,7 @@ export function LoginForm() {
   if (step === "email") {
     return (
       <form onSubmit={sendCode} className="space-y-4">
-        <h1 className="font-serif text-3xl">Sign in</h1>
+        <h1 className="font-serif text-3xl">{next === "/rsvp" ? "Sign in to RSVP" : "Sign in"}</h1>
         <p className="text-muted">Enter the email you set up your invitation with, or the one Billy &amp; Simmi have for you.</p>
         <label className="block">
           <span className="mb-1 block text-sm font-medium">Email</span>

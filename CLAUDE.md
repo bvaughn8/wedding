@@ -56,9 +56,10 @@ No linter is configured yet (`next lint` was removed in Next 16; add ESLint or B
 - **Pre-filled email (no QR):** admins can type an email onto an unclaimed guest in `/admin`; that guest can then sign in at `/login` and is linked on first verify (`app/login/actions.ts`). Once linked, the email can only change via "Reset sign-in".
 - Codes, not magic links (links open inside email apps' in-app browsers on phones).
 - `/login` deliberately doesn't reveal whether an email is on the guest list.
-- **The gate is the guest list**, not the login: `proxy.ts` only refreshes the session and redirects signed-out users; `app/(site)/layout.tsx` uses `getCurrentGuest()` (`lib/guest.ts`) to require a linked guest, else `/not-invited`.
+- **The gate is the guest list**, not the login: `proxy.ts` only refreshes the session and redirects signed-out users (to `/login?next=<path>`; `lib/next-path.ts` keeps `next` same-site); `app/(site)/layout.tsx` uses `getCurrentGuest()` (`lib/guest.ts`) to require a linked guest, else `/not-invited`.
 - Every server action re-validates the invite token server-side; never trust guest/household IDs from the browser alone.
 - Admins are guests with `is_admin = true` (Billy & Simmi).
+- **Public pages:** `app/(public)/` (Our story at `/about`) needs no sign-in; each path is also listed in `PUBLIC_PATHS` in `lib/supabase/proxy.ts`. Its photos are public in effect. Its RSVP button goes to `/rsvp`, so signed-out visitors land on `/login?next=/rsvp`.
 
 ## Layout
 
@@ -72,12 +73,14 @@ lib/guest.ts              getCurrentGuest(): signed-out | not-invited | ok
 lib/email.ts              email/code normalisation + masking
 app/i/[token]/            QR invite flow (page, client flow, server actions)
 app/login/                returning-guest sign-in
+app/(public)/             open to anyone: Our story (/about)
 app/(site)/               everything behind the gate
 app/(site)/admin/         admin only (requireAdmin in lib/admin.ts): households, guests, invite links, QR print page, CSV export
 app/(site)/rsvp/          household RSVP form + saveRsvp action
 app/not-invited/          signed in but not linked to a guest
 app/auth/signout/         POST sign-out
 components/ui.tsx         shared UI primitives
+components/site-header.tsx nav shared by (site) and (public)
 supabase/migrations/      schema, grants, RLS
 ```
 
