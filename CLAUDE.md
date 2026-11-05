@@ -38,6 +38,7 @@ No linter is configured yet (`next lint` was removed in Next 16; add ESLint or B
 - `SITE_URL` — e.g. `https://billyandsimmi.com`; base for invite links and QR codes. Falls back to the request host (fine locally, wrong for printing).
 - `DEV_LOG_AUTH_CODES=true` — dev only: sign-in codes are printed to the `npm run dev` log (`[LOG_AUTH_CODES] …`) instead of emailed (`lib/auth-code.ts`). Ignored when `NODE_ENV` is production. `/login` still only issues codes for emails already linked to a guest.
 - `LOG_ADMIN_AUTH_CODES=true` — soft launch, any environment (Vercel logs included): codes are logged instead of emailed **only for admin guests**; other guests always get an email. Turn off once Resend SMTP works.
+- `LOG_ALL_AUTH_CODES=true` — soft launch, any environment: **every** code is logged and no emails are sent (codes are passed on by hand). Anyone with log access can sign in as any guest; turn off once Resend SMTP works.
 
 ## Testing the app locally
 
