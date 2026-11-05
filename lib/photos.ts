@@ -16,7 +16,8 @@ const cache = new Map<string, { url: string; until: number }>();
  * ("about/simmi.jpg"). Paths that don't exist are left out (and logged), so
  * callers can fall back to a placeholder.
  *
- * Only call this while rendering for a signed-in guest — the URLs grant access.
+ * The URLs grant access to whoever receives them: only sign photos meant for
+ * the page being rendered. (Our story is public, so its photos are too.)
  */
 export async function signedPhotoUrls(paths: string[]): Promise<Map<string, string>> {
   const now = Date.now();

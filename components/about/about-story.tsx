@@ -24,7 +24,12 @@ import { lerp, lerpU, seg } from "@/lib/scroll";
 
 type TimelineItem = (typeof timeline)[number];
 
-/** Must only render for signed-in guests: it signs private photo URLs. */
+/**
+ * Public page: anyone can view it, so every photo referenced in
+ * content/about.ts is effectively public (its signed URL is handed to any
+ * visitor). The RSVP button goes to /rsvp, which sends signed-out visitors
+ * to /login?next=/rsvp first.
+ */
 export async function AboutStory() {
   const all: PhotoData[] = [intro.photo, simmi.photo, billy.photo, ...timeline.map((t) => t.photo)];
   const urls = await signedPhotoUrls(all.flatMap((p) => (p.image ? [p.image] : [])));

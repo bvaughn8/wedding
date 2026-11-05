@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 /** Paths anyone can open without being signed in. */
-const PUBLIC_PATHS = ["/login", "/i/", "/auth/"];
+const PUBLIC_PATHS = ["/login", "/i/", "/auth/", "/about"];
 
 function isPublic(pathname: string) {
   return PUBLIC_PATHS.some((p) =>
@@ -52,7 +52,9 @@ export async function updateSession(request: NextRequest) {
   if (!signedIn && !isPublic(request.nextUrl.pathname)) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
-    url.search = "";
+    // Come back here after signing in (e.g. the RSVP button on Our story).
+    const next = request.nextUrl.pathname === "/" ? "" : request.nextUrl.pathname + request.nextUrl.search;
+    url.search = next ? `?next=${encodeURIComponent(next)}` : "";
     const redirect = NextResponse.redirect(url);
     response.cookies.getAll().forEach((c) => redirect.cookies.set(c));
     return redirect;
