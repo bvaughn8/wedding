@@ -10,8 +10,10 @@ import { createClient } from "@/lib/supabase/server";
  * - DEV_LOG_AUTH_CODES=true  — dev server only, every email. Ignored when
  *   NODE_ENV is "production".
  * - LOG_ADMIN_AUTH_CODES=true — any environment (incl. Vercel), but only for
- *   admin guests (Billy & Simmi). Guests' codes are always emailed, so a
- *   guest's code never ends up in a log. For a soft launch; remove once
+ *   admin guests (Billy & Simmi). Guests' codes are still emailed.
+ * - LOG_ALL_AUTH_CODES=true — any environment, every email. Nobody gets an
+ *   email; Billy & Simmi read codes from the logs and pass them on. Anyone
+ *   who can read the logs can sign in as any guest, so turn it off once
  *   email works.
  */
 function devLogAuthCodes() {
@@ -34,6 +36,7 @@ async function isAdminGuest(email: string, guestId?: string) {
 
 async function shouldLogCode(email: string, guestId?: string) {
   if (devLogAuthCodes()) return true;
+  if (process.env.LOG_ALL_AUTH_CODES === "true") return true;
   if (process.env.LOG_ADMIN_AUTH_CODES !== "true") return false;
   return isAdminGuest(email, guestId);
 }
