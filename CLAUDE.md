@@ -52,6 +52,7 @@ No linter is configured yet (`next lint` was removed in Next 16; add ESLint or B
 - Each household has an unguessable `households.invite_token`, printed on the invitation as a QR code → `/i/<token>`.
 - **First scan:** guest picks their name → enters email → verifies a 6-digit email OTP → `guests.user_id` + `guests.email` are set (`app/i/[token]/actions.ts`, `confirmClaim`).
 - **Later:** `/login` with email + OTP. Re-scanning the QR for an already-linked guest sends a code to their saved email.
+- **Pre-filled email (no QR):** admins can type an email onto an unclaimed guest in `/admin`; that guest can then sign in at `/login` and is linked on first verify (`app/login/actions.ts`). Once linked, the email can only change via "Reset sign-in".
 - Codes, not magic links (links open inside email apps' in-app browsers on phones).
 - `/login` deliberately doesn't reveal whether an email is on the guest list.
 - **The gate is the guest list**, not the login: `proxy.ts` only refreshes the session and redirects signed-out users; `app/(site)/layout.tsx` uses `getCurrentGuest()` (`lib/guest.ts`) to require a linked guest, else `/not-invited`.

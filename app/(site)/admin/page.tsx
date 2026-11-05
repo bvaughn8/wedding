@@ -16,6 +16,7 @@ import {
   removeGuest,
   renameHousehold,
   resetGuestSignIn,
+  setGuestEmail,
 } from "./actions";
 import { ActionButton, ActionForm, CopyButton } from "./forms";
 
@@ -135,9 +136,38 @@ function HouseholdCard({
                 {g.is_admin ? <Badge>Admin</Badge> : null}
                 {g.is_plus_one ? <Badge>Plus-one</Badge> : null}
               </p>
-              <p className="break-all text-sm text-muted">
-                {g.claimed_at ? `Signed up · ${g.email}` : "Not signed up yet"}
-              </p>
+              {g.claimed_at ? (
+                <p className="break-all text-sm text-muted">Signed up · {g.email}</p>
+              ) : (
+                <ActionForm
+                  key={g.email ?? ""}
+                  action={setGuestEmail}
+                  className="mt-1 flex flex-wrap items-center gap-2"
+                >
+                  <input type="hidden" name="guest_id" value={g.id} />
+                  <label className="sr-only" htmlFor={`email-${g.id}`}>
+                    Email for {guestName(g)}
+                  </label>
+                  <Input
+                    id={`email-${g.id}`}
+                    name="email"
+                    type="email"
+                    defaultValue={g.email ?? ""}
+                    placeholder="Email (optional)"
+                    autoComplete="off"
+                    className="max-w-64"
+                  />
+                  <button
+                    type="submit"
+                    className="min-h-9 rounded-md px-2 text-sm text-muted underline underline-offset-4 hover:text-ink"
+                  >
+                    Save
+                  </button>
+                  <span className="text-sm text-muted">
+                    {g.email ? "Can sign in at /login" : "Not signed up yet"}
+                  </span>
+                </ActionForm>
+              )}
             </div>
             {g.id !== myGuestId ? (
               <div className="flex flex-wrap items-center">
